@@ -1,0 +1,53 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageAccounts": {
+            "type": "array",
+            "defaultValue": [
+                {
+                    "name": "MyStorage",
+                    "kind": "StorageV2",
+                    "sku": {
+                        "name": "Standard_LRS",
+                        "tier": "Standard"
+                    }
+                },
+                {
+                    "name": "Logs",
+                    "kind": "StorageV2",
+                    "sku": {
+                        "name": "Standard_LRS",
+                        "tier": "Standard"
+                    }
+                }
+            ]
+        },
+        "location": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "name": "[concat('stor-', parameters('storageAccounts')[copyIndex()].name)]",
+            "copy": {
+                "name": "StorageIterator",
+                "count": "[length(parameters('storageAccounts'))]",
+                "mode": "Serial", // or Parallel
+                "batchSize": 2
+            },
+            "type": "Microsoft.Storage/storageAccounts",
+            "sku": {
+                "name": "[parameters('storageAccounts')[copyIndex()].sku.name]",
+                "tier": "[parameters('storageAccounts')[copyIndex()].sku.tier]"
+            },
+            "kind": "[parameters('storageAccounts')[copyIndex()].kind]",
+            "apiVersion": "2019-04-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "supportsHttpsTrafficOnly": true,
+                "accessTier": "Cool"
+            }
+        }
+    ]
+}

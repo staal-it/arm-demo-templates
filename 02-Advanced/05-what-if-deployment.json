@@ -1,0 +1,7 @@
+// The -Whatif operator allows us to preview the changes that will happen
+
+PowerShell
+New-AzResourceGroupDeployment -Whatif
+
+Azure CLI
+az deployment group what-if

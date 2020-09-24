@@ -1,0 +1,67 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "env": {
+            "value": "__environmentName__"
+        },
+        "appServicePlan": {
+            "value": {
+                "name": "plan-azarmdemo-__environmentName__",
+                "skuCapacity": 1,
+                "skuName": "B1"
+            }
+        },
+        "sqlSettings": {
+            "value": {
+                "sqlServerName": "sql-azarmdemo__environmentName__",
+                "sqlServerUsername": "azarmdemo",
+                "sqlServerPassword": "__sqlServerPassword__",
+                "elasticPool": {
+                    "name": "sqlpool-azarmdemo__environmentName__",
+                    "sku": {
+                        "name": "BasicPool",
+                        "tier": "Basic",
+                        "capacity": 50
+                    },
+                    "databaseDtuMin": "0",
+                    "databaseDtuMax": "5",
+                    "maxSizeBytes": 5242880000
+                },
+                "databases": [
+                    {
+                        "name": "sqldb-azarmdemo-standard__environmentName__",
+                        "onPool": "sqlpool-azarmdemo__environmentName__"
+                    },
+                    {
+                        "name": "sqldb-azarmdemo-standard-2__environmentName__",
+                        "onPool": "sqlpool-azarmdemo__environmentName__"
+                    }
+                ]
+            }
+        },
+        "storageAccountSettings": {
+            "value": {
+                "name": "stazarmdemo__environmentName__",
+                "sku": {
+                    "name": "Standard_LRS",
+                    "tier": "Standard"
+                },
+                "kind": "StorageV2",
+                "supportsHttpsTrafficOnly": true,
+                "accessTier": "Cool"
+            }
+        },
+        "keyVaultAccessPolicies": {
+            "value": []
+        },
+        "templateSettings": {
+            "value": {
+                "location": "__location__",
+                "storageAccountUrl": "https://__templateStorageAccountName__.blob.core.windows.net",
+                "storageAccountKey": "__templateStorageAccountKey__",
+                "storageContainer": "__templateStorageContainerName__"
+            }
+        }
+    }
+}

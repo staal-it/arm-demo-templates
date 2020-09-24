@@ -1,0 +1,63 @@
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: 'PublishTemplates'
+  displayName: 'Publish Templates'
+  jobs: 
+    - job: 'PublishTemplates'
+      steps:
+      - task: CopyFiles@2
+        displayName: 'Copy composing to: $(build.artifactstagingdirectory)'
+        inputs:
+          Contents: | 
+            composing/**
+            nested/**
+          TargetFolder: '$(build.artifactstagingdirectory)/templates'
+          DefaultWorkingDirectory: '03-Demo-Infrastructure/'
+      - task: AzureCLI@2
+        displayName: "Create container $(Build.BuildId)"
+        inputs:
+          azureSubscription: '$AZURESUBSCRIPTIONNAME'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: 'az storage container create --connection-string "$STORAGECONNECTIONSTRING" -n $CONTAINERNAME --account-name armtempldemo'
+      - task: AzureCLI@2
+        inputs:
+          azureSubscription: '$AZURESUBSCRIPTIONNAME'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: 'az storage blob upload-batch --account-name armtempldemo -d $CONTAINERNAME -s $(build.artifactstagingdirectory)/templates --connection-string "$STORAGECONNECTIONSTRING"'
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Artifact: drop'
+- stage: 'DelployTemplates'
+  displayName: 'Deploy Templates'
+  jobs: 
+    - job: 'DelployTemplates'
+      steps:
+      - task: DownloadBuildArtifacts@0
+        inputs:
+          buildType: 'current'
+          downloadType: 'single'
+          artifactName: 'drop'
+          downloadPath: '$(System.DefaultWorkingDirectory)'
+      - task: colinsalmcorner.colinsalmcorner-buildtasks.replace-tokens-task.ReplaceTokens@1
+        inputs:
+          sourcePath: '$(System.DefaultWorkingDirectory)/drop/templates/composing/'
+          filePattern: 'Application.parameters.json'
+          tokenRegex: '__(\w+)__'
+      - task: AzureResourceManagerTemplateDeployment@3
+        inputs:
+          deploymentScope: 'Resource Group'
+          azureResourceManagerConnection: '$AZURESUBSCRIPTIONNAME'
+          subscriptionId: '$AZURESUBSCRIPTIONID'
+          action: 'Create Or Update Resource Group'
+          resourceGroupName: 'arm-template-demo'
+          location: 'West Europe'
+          templateLocation: 'Linked artifact'
+          csmFile: '$(System.DefaultWorkingDirectory)/drop/templates/composing/Application.json'
+          csmParametersFile: '$(System.DefaultWorkingDirectory)/drop/templates/composing/Application.parameters.json'
+          deploymentMode: 'Incremental'

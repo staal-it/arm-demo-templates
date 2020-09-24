@@ -1,0 +1,57 @@
+/*
+These scripts can be used for performing custom steps such as:
+
+- Perform data plane operations, for example, copy blobs or seed database
+- Create a self-signed certificate
+- Create an object in Azure AD
+- Look up a value from a custom system
+*/
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "apiProfile": "2018-03-01-hybrid",
+    "parameters": {},
+    "variables": {},
+    "functions": [],
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deploymentScripts",
+            "apiVersion": "2019-10-01-preview",
+            "name": "runPowerShellInline",
+            "location": "[resourceGroup().location]",
+            "kind": "AzurePowerShell", // or "AzureCLI"
+            "identity": {
+                "type": "userAssigned",
+                "userAssignedIdentities": {
+                    "/subscriptions/01234567-89AB-CDEF-0123-456789ABCDEF/resourceGroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID": {}
+                }
+            },
+            "properties": {
+                "forceUpdateTag": 1,
+                "storageAccountSettings": {
+                    "storageAccountName": "myStorageAccount",
+                    "storageAccountKey": "myKey"
+                },
+                "azPowerShellVersion": "3.0", // or "azCliVersion": "2.0.80"
+                "arguments": "-name \\\"John Dole\\\"",
+                "environmentVariables": [
+                    {
+                        "name": "someSecret",
+                        "secureValue": "if this is really a secret, don't put it here... in plain text..."
+                    }
+                ],
+                "scriptContent": "
+                    param([string] $name)
+                    $output = 'Hello {0}' -f $name
+                    Write-Output $output
+                    $DeploymentScriptOutputs = @{}
+                    $DeploymentScriptOutputs['text'] = $output
+                    ", // or "primaryScriptUri": "https://raw.githubusercontent.com/Azure/azure-docs-json-samples/master/deployment-script/deploymentscript-helloworld.ps1",
+                "timeout": "PT30M",
+                "cleanupPreference": "OnSuccess",
+                "retentionInterval": "P1D"
+            }
+        }
+    ],
+    "outputs": {}
+}

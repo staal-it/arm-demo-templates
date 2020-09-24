@@ -1,0 +1,30 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "databaseSettings": {
+            "type": "object"
+        },
+        "sqlServerName": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Sql/servers/databases",
+            "kind": "v12.0,user",
+            "name": "[concat(parameters('sqlServerName'), '/', parameters('databaseSettings').name)]",
+            "apiVersion": "2017-10-01-preview",
+            "location": "[parameters('location')]",
+            "properties": {
+                "collation": "SQL_Latin1_General_CP1_CI_AS",
+                "requestedServiceObjectiveName": "ElasticPool",
+                "elasticPoolId": "[resourceId('Microsoft.Sql/servers/elasticPools', parameters('sqlServerName') , parameters('databaseSettings').onPool)]"
+            }
+        }
+    ]
+}
