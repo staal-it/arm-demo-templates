@@ -77,7 +77,8 @@
             "type": "Microsoft.Resources/deployments",
             "dependsOn": 
             [
-                "KeyVault"
+                "KeyVault",
+                "WebApp-Api"
             ],
             "properties": {
                 "mode": "Incremental",
