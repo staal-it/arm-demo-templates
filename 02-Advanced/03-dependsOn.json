@@ -40,7 +40,7 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Sql/servers/', parameters('serverName'))]"  // could be in a different template
                 // "[parameters('serverName')]"
-                // "storageLoop"
+                // "NameOfADpeloyment"
             ],
             "apiVersion": "2015-05-01-preview",
             "name": "AllowAllWindowsAzureIps",
