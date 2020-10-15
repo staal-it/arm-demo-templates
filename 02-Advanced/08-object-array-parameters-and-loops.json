@@ -23,6 +23,9 @@
                 }
             ]
         },
+        "subnets": {
+            "type": "array"
+        },
         "location": {
             "type": "string"
         }
@@ -30,7 +33,7 @@
     "resources": [
         {
             "name": "[concat('stor-', parameters('storageAccounts')[copyIndex()].name)]",
-            "copy": {
+            "copy": { // <-- can also be used in variables of properties of a resource
                 "name": "StorageIterator",
                 "count": "[length(parameters('storageAccounts'))]",
                 "mode": "Serial", // or Parallel
@@ -47,6 +50,31 @@
             "properties": {
                 "supportsHttpsTrafficOnly": true,
                 "accessTier": "Cool"
+            }
+        },
+        {
+            "apiVersion": "2019-09-01",
+            "name": "virtualNetworkName]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "location": "[parameters('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [ "10.0.0.1/16" ]
+                },
+                "copy": [
+                    {
+                        "name": "subnets",
+                        "count": "[length(parameters('subnets'))]",
+                        "input": {
+                            "name": "[parameters('subnets')[copyIndex('subnets')].name]",
+                            "properties": {
+                                "addressPrefix": "[parameters('subnets')[copyIndex('subnets')].addressPrefix]",
+                                "serviceEndpoints": "[parameters('subnets')[copyIndex('subnets')].serviceEndpoints]",
+                                "delegations": "[parameters('subnets')[copyIndex('subnets')].delegations]"
+                            }
+                        }
+                    }
+                ]
             }
         }
     ]
