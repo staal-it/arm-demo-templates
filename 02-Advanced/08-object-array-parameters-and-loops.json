@@ -33,7 +33,7 @@
     "resources": [
         {
             "name": "[concat('stor-', parameters('storageAccounts')[copyIndex()].name)]",
-            "copy": { // <-- can also be used in variables of properties of a resource
+            "copy": {                               // <-- can also be used in variables or properties of a resource
                 "name": "StorageIterator",
                 "count": "[length(parameters('storageAccounts'))]",
                 "mode": "Serial", // or Parallel

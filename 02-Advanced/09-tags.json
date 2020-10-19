@@ -1,0 +1,63 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "appServicePlanName": {
+            "type": "string"
+        },
+        "webappname": {
+            "type": "string"
+        },
+        "resourceTags": {
+            "type": "object",
+            "defaultValue": {
+                "Environment": "Dev",
+                "Project": "Tutorial"
+            }
+        },
+        "location": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2015-08-01",
+            "name": "[parameters('appServicePlanName')]",
+            "kind": "linux",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "S1",
+                "capacity": 1
+            },
+            "tags": "[parameters('resourceTags')]",
+            "properties": {
+                "name": "[parameters('appServicePlanName')]",
+                "workerSizeId": "1",
+                "reserved": true,
+                "numberOfWorkers": 1
+            }
+        },
+        {
+            "apiVersion": "2018-02-01",
+            "name": "[parameters('webappname')]",
+            "type": "Microsoft.Web/sites",
+            "location": "[parameters('location')]",
+            "kind": "app,linux",
+            "tags": "[parameters('resourceTags')]",
+            "properties": {
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]"
+            }
+        },
+        {
+            "name": "[concat(parameters('webappname'), '/', 'appsettings')]",
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2018-02-01",
+            "location": "[parameters('location')]",
+            "properties": {                                                         //  <-- might cause a restart!
+                "WEBSITE_ADD_SITENAME_BINDINGS_IN_APPHOST_CONFIG": "1",
+                "WEBSITE_NODE_DEFAULT_VERSION": "6.9.1"
+            }
+        }
+    ]
+}
