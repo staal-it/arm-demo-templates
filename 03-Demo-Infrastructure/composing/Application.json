@@ -75,8 +75,7 @@
             "apiVersion": "2015-01-01",
             "name": "KeyVaultAccessPoliciesForAPI",
             "type": "Microsoft.Resources/deployments",
-            "dependsOn": 
-            [
+            "dependsOn": [
                 "KeyVault",
                 "WebApp-Api"
             ],
