@@ -32,14 +32,14 @@
                 "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
                 "version": "12.0"
             },
-            // sub-resource <-- we can have a resource specified as subresource
+                                                                    // sub-resource <-- we can have a resource specified as subresource
             "resources": [
                 {
                     "condition": "[parameters('allowAzureIPs')]",
-                    "type": "firewallRules", // <-- no need to specify the full type when used as a sub-resource
+                    "type": "firewallRules",                         // <-- no need to specify the full type when used as a sub-resource
                     "apiVersion": "2015-05-01-preview",
                     "name": "AllowAllWindowsAzureIps",
-                    "location": "[parameters('location')]",  // <-- you still need a valid value here even when the condition is false
+                    "location": "[parameters('location')]",          // <-- you still need a valid value here even when the condition is false
                     "dependsOn": [
                         "[resourceId('Microsoft.Sql/servers/', parameters('serverName'))]"
                     ],

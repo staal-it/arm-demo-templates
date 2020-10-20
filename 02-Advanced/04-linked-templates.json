@@ -13,8 +13,9 @@
             "apiVersion": "2019-10-01",
             "name": "linkedTemplate",
             "properties": {
-                "mode": "Incremental",
+                "mode": "Incremental",                                  // <-- deployment modes: complete, incremental
                 "templateLink": {
+                                                                        // <-- requires a public endpoint
                     "uri": "https://mystorageaccount.blob.core.windows.net/AzureTemplates/StorageAccount.json",
                     "contentVersion": "1.0.0.0"
                 },
