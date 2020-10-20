@@ -33,7 +33,7 @@
     "resources": [
         {
             "name": "[concat('stor-', parameters('storageAccounts')[copyIndex()].name)]",
-            "copy": {                               // <-- can also be used in variables or properties of a resource
+            "copy": {         // <-- can also be used in variables or properties of a resource
                 "name": "StorageIterator",
                 "count": "[length(parameters('storageAccounts'))]",
                 "mode": "Serial", // or Parallel
@@ -61,7 +61,7 @@
                 "addressSpace": {
                     "addressPrefixes": [ "10.0.0.1/16" ]
                 },
-                "copy": [
+                "copy": [       // <-- this is an array!
                     {
                         "name": "subnets",
                         "count": "[length(parameters('subnets'))]",
