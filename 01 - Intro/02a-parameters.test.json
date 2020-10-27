@@ -4,6 +4,9 @@
     "parameters": {
         "storageSKU": {
             "value": "Standard_LRS"
+        },
+        "storageNamePrefix": {
+            "value": "stor-"
         }
     }
 }
