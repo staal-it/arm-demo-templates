@@ -58,6 +58,6 @@ stages:
           resourceGroupName: 'arm-template-demo'
           location: 'West Europe'
           templateLocation: 'Linked artifact'
-          csmFile: '$(System.DefaultWorkingDirectory)/drop/templates/composing/Application.json'
+          csmFile: '$(System.DefaultWorkingDirectory)/drop/templates/composing/ApplicationMain.json'
           csmParametersFile: '$(System.DefaultWorkingDirectory)/drop/templates/composing/Application.parameters.json'
           deploymentMode: 'Incremental'
