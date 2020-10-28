@@ -1,0 +1,150 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "env": {
+            "type": "string"
+        },
+        "appServicePlan": {
+            "type": "object"
+        },
+        "sqlSettings": {
+            "type": "object"
+        },
+        "storageAccountSettings": {
+            "type": "object"
+        },
+        "keyVaultAccessPolicies": {
+            "type": "array"
+        },
+        "templateSettings": {
+            "type": "object"
+        }
+    },
+    "variables": {
+        "webAppName": "[concat('app-azarmdemo', '-', parameters('env'))]",
+        "keyVaultName": "[concat('kv-azarmdemo', '-', parameters('env'))]",
+        "appConfigurationName": "[concat('appconfig-azarmdemo', '-', parameters('env'))]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2015-01-01",
+            "name": "KeyVault",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateSettings').storageAccountUrl, '/', parameters('templateSettings').storageContainer, '/nested/KeyVault/KeyVault.json', parameters('templateSettings').storageAccountKey)]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "keyVaultName": {
+                        "value": "[variables('keyVaultName')]"
+                    },
+                    "accessPolicies": {
+                        "value": "[parameters('keyVaultAccessPolicies')]"
+                    },
+                    "location": {
+                        "value": "[parameters('templateSettings').location]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-01-01",
+            "name": "KeyVaultAccessPoliciesForAPI",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "KeyVault",
+                "WebApp"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateSettings').storageAccountUrl, '/', parameters('templateSettings').storageContainer, '/nested/KeyVault/KeyVaultAccessPolicies.json', parameters('templateSettings').storageAccountKey)]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "keyVaultName": {
+                        "value": "[variables('keyvaultName')]"
+                    },
+                    "resourceId": {
+                        "value": "[resourceId(resourceGroup().name, 'Microsoft.Web/Sites/', concat(variables('webAppName'), '-api'))]"
+                    },
+                    "location": {
+                        "value": "[parameters('templateSettings').location]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-01-01",
+            "name": "AppConfiguration",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateSettings').storageAccountUrl, '/', parameters('templateSettings').storageContainer, '/nested/AppConfiguration/AppConfiguration.json', parameters('templateSettings').storageAccountKey)]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "appConfigurationName": {
+                        "value": "[variables('appConfigurationName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('templateSettings').location]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-01-01",
+            "name": "WebApp",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateSettings').storageAccountUrl, '/', parameters('templateSettings').storageContainer, '/composing/WebApp.json', parameters('templateSettings').storageAccountKey)]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "env": {
+                        "value": "[parameters('env')]"
+                    },
+                    "webAppName": {
+                        "value": "[variables('webAppName')]"
+                    },
+                    "appServicePlan": {
+                        "value": "[parameters('appServicePlan')]"
+                    },
+                    "templateSettings": {
+                        "value": "[parameters('templateSettings')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-01-01",
+            "name": "Storage",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateSettings').storageAccountUrl, '/', parameters('templateSettings').storageContainer, '/composing/Storage.json', parameters('templateSettings').storageAccountKey)]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "sqlSettings": {
+                        "value": "[parameters('sqlSettings')]"
+                    },
+                    "storageAccountSettings": {
+                        "value": "[parameters('storageAccountSettings')]"
+                    },
+                    "templateSettings": {
+                        "value": "[parameters('templateSettings')]"
+                    }
+                }
+            }
+        }
+    ]
+}

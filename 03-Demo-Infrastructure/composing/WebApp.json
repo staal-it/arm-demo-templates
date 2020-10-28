@@ -1,0 +1,123 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "env": {
+            "type": "string"
+        },
+        "webAppName": {
+            "type": "string"
+        },
+        "appServicePlan": {
+            "type": "object"
+        },
+        "templateSettings": {
+            "type": "object"
+        }
+    },
+    "variables": {
+        "appInsightsName": "[concat('appi-azarmdemo', '-', parameters('env'))]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2015-01-01",
+            "name": "ApplicationInsight",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateSettings').storageAccountUrl, '/', parameters('templateSettings').storageContainer, '/nested/Insights/ApplicationInsights.json', parameters('templateSettings').storageAccountKey)]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "applicationInsightsName": {
+                        "value": "[variables('appInsightsName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('templateSettings').location]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-01-01",
+            "name": "Serverfarm",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateSettings').storageAccountUrl, '/', parameters('templateSettings').storageContainer, '/nested/WebApp/Serverfarm.json', parameters('templateSettings').storageAccountKey)]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "appServicePlan": {
+                        "value": "[parameters('appServicePlan')]"
+                    },
+                    "location": {
+                        "value": "[parameters('templateSettings').location]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-01-01",
+            "name": "WebApp-Api",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "Serverfarm",
+                "ApplicationInsight"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateSettings').storageAccountUrl, '/', parameters('templateSettings').storageContainer, '/nested/WebApp/WebApp.json', parameters('templateSettings').storageAccountKey)]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "webappname": {
+                        "value": "[concat(parameters('webAppName'), '-api')]"
+                    },
+                    "appServicePlanName": {
+                        "value": "[parameters('appServicePlan').name]"
+                    },
+                    "linuxFxVersion": {
+                        "value": "DOTNETCORE|3.1"
+                    },
+                    "location": {
+                        "value": "[parameters('templateSettings').location]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-01-01",
+            "name": "WebApp-Client",
+            "type": "Microsoft.Resources/deployments",
+            "dependsOn": [
+                "Serverfarm",
+                "ApplicationInsight"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('templateSettings').storageAccountUrl, '/', parameters('templateSettings').storageContainer, '/nested/WebApp/WebApp.json', parameters('templateSettings').storageAccountKey)]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "webappname": {
+                        "value": "[concat(parameters('webAppName'), '-client')]"
+                    },
+                    "appServicePlanName": {
+                        "value": "[parameters('appServicePlan').name]"
+                    },
+                    "linuxFxVersion": {
+                        "value": "NODE|lts"
+                    },
+                    "location": {
+                        "value": "[parameters('templateSettings').location]"
+                    }
+                }
+            }
+        }
+    ]
+}

@@ -36,11 +36,10 @@
         {
             "condition": "[parameters('allowAzureIPs')]",
             "type": "Microsoft.Sql/servers/firewallRules",
-            // can be multiple
             "dependsOn": [
-                "[resourceId('Microsoft.Sql/servers/', parameters('serverName'))]"  // could be in a different template
-                // "[parameters('serverName')]"
-                // "NameOfADpeloyment"
+                "[resourceId('Microsoft.Sql/servers/', parameters('serverName'))]",     // could be in a different template
+                "[parameters('serverName')]",                                           // in current template
+                "NameOfADpeloyment"                                                     // in current template
             ],
             "apiVersion": "2015-05-01-preview",
             "name": "AllowAllWindowsAzureIps",
