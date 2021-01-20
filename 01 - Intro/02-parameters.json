@@ -24,6 +24,8 @@
         {
             "type": "Microsoft.Storage/storageAccounts",
             "name": "MyStorageAccount",
+            "kind": "StorageV2",
+            "location": "West Europe",
             "sku": {
                 "name": "[parameters('storageSKU')]"
             }

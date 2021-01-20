@@ -1,3 +1,38 @@
+// Built-in function
+//Array functions
+//    contains()
+//    empty()
+//Comparison functions
+//    equals()
+//    greater()
+//Date functions
+//    utcNow()
+//Deployment value functions
+//    parameters()
+//Logical functions
+//    if()
+//    and()
+//    or()
+//Numeric functions
+//    int()
+//    max()
+//    min()
+//Object functions
+//    contains()
+//    empty()
+//    union()
+//Resource functions
+//    resourceId()
+//    resourceGroup()
+//    subscription()
+//    listKeys()
+//String functions
+//    concat()
+//    length()
+//    toLower()
+
+
+// custom functions
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",

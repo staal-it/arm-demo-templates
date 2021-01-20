@@ -16,7 +16,7 @@
                 "mode": "Incremental",                                  // <-- deployment modes: complete, incremental
                 "templateLink": {
                                                                         // <-- requires a public endpoint
-                    "uri": "https://mystorageaccount.blob.core.windows.net/AzureTemplates/StorageAccount.json",
+                    "uri": "https://mystorageaccount.blob.core.windows.net/AzureTemplates/StorageAccount.json?sasToken",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {

@@ -33,11 +33,11 @@
     "resources": [
         {
             "name": "[concat('stor-', parameters('storageAccounts')[copyIndex()].name)]",
-            "copy": {         // <-- can also be used in variables or properties of a resource
+            "copy": {         // <-- can also be used in variables, output or properties of a resource
                 "name": "StorageIterator",
                 "count": "[length(parameters('storageAccounts'))]",
                 "mode": "Serial", // or Parallel
-                "batchSize": 2
+                "batchSize": 1
             },
             "type": "Microsoft.Storage/storageAccounts",
             "sku": {
@@ -57,6 +57,7 @@
             "name": "virtualNetworkName]",
             "type": "Microsoft.Network/virtualNetworks",
             "location": "[parameters('location')]",
+            "dependsOn": ["StorageIterator"],               // <-- dependsOn Copy
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [ "10.0.0.1/16" ]

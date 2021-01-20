@@ -19,13 +19,11 @@
             "type": "string"
         }
     },
-    "variables": {},
-    "functions": [],
     "resources": [
         {
             "type": "Microsoft.Sql/servers",
-            "apiVersion": "2015-05-01-preview",
             "name": "[parameters('serverName')]",
+            "apiVersion": "2015-05-01-preview",
             "location": "[parameters('location')]",
             "properties": {
                 "administratorLogin": "[parameters('administratorLogin')]",
@@ -37,8 +35,8 @@
                 {
                     "condition": "[parameters('allowAzureIPs')]",
                     "type": "firewallRules",                         // <-- no need to specify the full type when used as a sub-resource
-                    "apiVersion": "2015-05-01-preview",
                     "name": "AllowAllWindowsAzureIps",
+                    "apiVersion": "2015-05-01-preview",
                     "location": "[parameters('location')]",          // <-- you still need a valid value here even when the condition is false
                     "dependsOn": [
                         "[resourceId('Microsoft.Sql/servers/', parameters('serverName'))]"
@@ -49,6 +47,22 @@
                     }
                 }
             ]
+        },
+        {
+            "condition": "[parameters('allowAzureIPs')]",
+            "type": "Microsoft.Sql/servers/firewallRules",
+            "name": "[concat(parameters('serverName'), '/', 'AllowAllWindowsAzureIps')]",
+            "dependsOn": [
+                "NameOfADpeloyment",                                                    // in current template
+                "[parameters('serverName')]",                                           // in current template
+                "[resourceId('Microsoft.Sql/servers/', parameters('serverName'))]"      // could be in a different template
+            ],
+            "apiVersion": "2015-05-01-preview",
+            "location": "[parameters('location')]",
+            "properties": {
+                "endIpAddress": "0.0.0.0",
+                "startIpAddress": "0.0.0.0"
+            }
         }
     ]
 }
