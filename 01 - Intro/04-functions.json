@@ -37,7 +37,7 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "storageNamePrefix": {
+        "storageName": {
             "type": "string",
             "maxLength": 11
         }
@@ -46,16 +46,16 @@
         {
             "namespace": "demofunction",
             "members": {
-                "uniqueName": {
+                "capitalize": {
                     "parameters": [
                         {
-                            "name": "namePrefix",
+                            "name": "input",
                             "type": "string"
                         }
                     ],
                     "output": {
                         "type": "string",
-                        "value": "[concat(toLower(parameters('namePrefix')), uniqueString(resourceGroup().id))]"
+                        "value": "[concat(toUpper(first(parameters('input'))), toLower(skip(parameters('input'), 1)))]"
                     }
                 }
             }
@@ -65,15 +65,12 @@
         {
             "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "2019-04-01",
-            "name": "[demofunction.uniqueName(parameters('storageNamePrefix'))]",
+            "name": "[demofunction.capitalize(parameters('storageName'))]",
             "location": "South Central US",
             "sku": {
                 "name": "Standard_LRS"
             },
-            "kind": "StorageV2",
-            "properties": {
-                "supportsHttpsTrafficOnly": true
-            }
+            "kind": "StorageV2"
         }
     ]
 }
