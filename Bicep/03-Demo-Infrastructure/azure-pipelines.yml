@@ -1,0 +1,97 @@
+trigger: none
+
+pool:
+  vmImage: windows-latest
+
+variables:
+
+  BicepFolderPath: $(Build.SourcesDirectory)\Bicep\03-Demo-Infrastructure\IaC
+  ParameterFilesFolderPath: $(Build.SourcesDirectory)\Resources\Management\Deployment
+
+  TestSubscriptionId: <subscriptionId>
+  TestAzureResourceManagerConnection: <azure-connection>
+  
+  ProdSubscriptionId: subscriptionId
+  ProdAzureResourceManagerConnection: <azure-connection>
+
+stages:
+- stage: 'PublishTemplates'
+  displayName: 'PublishTemplates'
+
+  variables:
+    MainBicepFilePath: '${{ variables.BicepFolderPath }}\mainDeployment.bicep'
+    MainTemplateFilePath: '${{ variables.BicepFolderPath }}\mainDeployment.json'
+    MainTemplateTestParameterFilePath: $(Build.SourcesDirectory)\Bicep\03-Demo-Infrastructure\parameters.test.json
+
+  jobs:
+    - job: PublishTemplates
+      displayName: Publish Templates
+
+      steps:
+        - checkout: self
+          path: src
+
+        - task: PowerShell@2
+          displayName: Bicep Build
+          inputs:
+            targetType: 'inline'
+            script: |
+              az bicep build --file ${{ variables.MainBicepFilePath }}
+            pwsh: true
+
+        - task: AzureResourceManagerTemplateDeployment@3
+          displayName: Validate ARM Template
+          inputs:
+            azureResourceManagerConnection: ${{ variables.TestAzureResourceManagerConnection }}
+            deploymentScope: 'Subscription'
+            subscriptionId: '${{ variables.TestSubscriptionId }}'
+            location: 'West Europe'
+            templateLocation: 'Linked artifact'
+            csmFile: '${{ variables.MainTemplateFilePath }}'
+            csmParametersFile: '${{ variables.MainTemplateTestParameterFilePath }}'
+            deploymentMode: 'Validation'
+
+        - task: CopyFiles@2
+          displayName: 'Copy templates to $(build.artifactstagingdirectory)/templates'
+          inputs:
+            SourceFolder: ${{ variables.BicepFolderPath }}
+            Contents: '*.json'
+            TargetFolder: '$(build.artifactstagingdirectory)/templates'
+
+        - task: CopyFiles@2
+          displayName: 'Copy parameters to $(build.artifactstagingdirectory)/templates'
+          inputs:
+            SourceFolder: ${{ variables.ParameterFilesFolderPath }}
+            Contents: '*.json'
+            TargetFolder: '$(build.artifactstagingdirectory)/templates'
+
+        - task: PublishBuildArtifacts@1
+          displayName: 'Publish Artifact: drop'
+
+- stage: DeployManagementWestEuropeTest
+  displayName: Deploy Platform Test Management resources West Europe ARM template
+
+  jobs:
+    - job: DeployToEnvironment
+      displayName: Deploy ARM template to Environment
+  
+      steps:
+      - task: DownloadBuildArtifacts@0
+        displayName: Download Build Artifacts
+        inputs:
+          buildType: 'current'
+          downloadType: 'single'
+          artifactName: 'drop'
+          downloadPath: '$(System.DefaultWorkingDirectory)'
+  
+      - task: AzureResourceManagerTemplateDeployment@3
+        displayName: Deploy Main Template
+        inputs:
+          azureResourceManagerConnection: '${{ parameters.AzureResourceManagerConnection }}'
+          deploymentScope: 'Subscription'
+          subscriptionId: '${{ parameters.SubscriptionId }}'
+          location: ${{ parameters.Location }}
+          templateLocation: 'Linked artifact'
+          csmFile: '$(System.DefaultWorkingDirectory)\drop\templates\mainDeployment.json'
+          csmParametersFile: ${{ parameters.CsmParametersFile }}
+          deploymentMode: 'Incremental'
